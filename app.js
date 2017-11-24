@@ -52,8 +52,6 @@ app.get('/data',function(req, res, next) {
 
 			try {
 
-				 
-
 				var json = JSON.parse(resdata),
 					total_count = json.result.data.length,
 					ret  = {

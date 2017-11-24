@@ -22,41 +22,146 @@
 			padding: 0;
 			margin: 0;
     	}
-    	 
+		img {
+			width: 100%;
+		}
+    	a {
+			color: #000;
+			text-decoration: none;
+		}
+
+		.fl {
+
+			float: left;
+		}
+
+		.fr {
+
+			float: right;
+		}
+		.clear:after {
+			content: "";
+			display: block;
+			height: 0;
+			clear: both;
+			visibility: hidden; 
+		}
+		.clear {
+			clear: both;
+		}
+    	.nav {
+    		position: fixed;
+    		left: 0;
+    		right: 0;
+    		top: 0;
+			display: flex;
+			display: -webkit-flex; 
+			height: 40px;
+			line-height: 40px;
+			background: #eee;
+
+    	}
+    	.nav li {
+			
+			list-style: none;
+			flex-grow: 1 ;
+			flex-shrink: 1;
+			text-align: center;
+    	}
+		
+		.nav li.on {
+
+			border-bottom: 2px solid #333;
+		}
+		.news {
+			margin-top: 40px;
+			padding-bottom: 30px;
+
+		}
+		.news-item {
+
+			border-bottom: 1px solid #ddd;
+			padding: 10px;
+			
+			margin: 0;
+			
+			
+		}
+		.news-item > a {
+			display: block;
+
+
+		} 
+		.news-item  .title {
+			
+			font-size: 16px;
+			font-weight: normal;
+			margin: 3px 0;
+			
+			/*overflow: hidden;
+
+			display: -webkit-box;
+			-webkit-box-orient: vertical;
+			-webkit-line-clamp: 2;*/
+			
+
+
+		}
+		.news-item .img-box {
+			
+			display: flex;
+			display: -webkit-flex; 
+			 
+			
+		}
+
+		.news-item .img-box .img-warp{
+
+			
+			flex-grow: 1;
+   			flex-shrink: 1;
+   			text-align: center;
+   			padding: 3px;
+
+		}	
+
+		.news-item .img-box .img-warp img{
+
+			width: 100%;
+			height: 100%;
+		}
+    	
+    	.news-item .tags {
+			margin-top: 0;
+    		font-size: 12px;
+    		color: #999;
+    	}
+		.news-item .info-box {
+
+			width: 66%;
+		}
+		.news-item .info-box .tags{
+
+			margin-top: 5px;
+		}
+    	.news-item .img-one-box {
+			
+    		width: 33%;
+    	}
+    	.load-item {
+    		text-align:center;
+    		margin: 70px 0;
+    	}
 
     </style>
+    	
 </head>
 <body>
-	
-	<header>
-		<ul>
-			<li>
-				头条
-			</li>
-			<li>
-				社会
-			</li>
-			<li>
-				娱乐
-			</li>
-			<li>
-				体育
-			</li>	
-			<li>
-				科技
-			</li>
-			<li>
-				时尚
-			</li>
-			<li>
-				军事
-			</li>
-			<li>
-				财经
-			</li>
+ 
 
-		</ul>
-	</header>
+	<div id='news' >
+		
+	</div>
 
 </body>
 
@@ -66,8 +171,197 @@
 
 -->
 
-<script type="text/beble">
+<script type="text/babel">
 	
+		
+
+	 
+		var Dd = React.createClass({
+			
+
+			getInitialState: function() {
+
+				return {
+					is_load: true,
+					headers: this.getHeaderData(),
+					data: [] ,
+					params:"top"
+				}
+
+			},
+			componentDidMount: function() {
+			
+			    this.getNewsDataCore(this.state.params);
+			
+			},
+			getHeaderData: function() {
+
+				return [
+						{ name: "头条" , key: "top"  },
+						{ name: "社会" , key: "shehui" },
+						{ name: "娱乐" , key: "yule" },
+						{ name: "体育" , key: "tiyu" },
+						{ name: "军事" , key: "junshi" },
+						{ name: "科技" , key: "keji" },
+						{ name: "财经" , key: "caijing" },
+						{ name: "时尚" , key: "shishang" },
+					];
+
+
+			},
+			getHeader: function() {
+
+				var headers = [],
+					_this = this;
+
+				this.state.headers.map(function(d,i) { 
+
+
+					 headers.push(<li onClick={ _this.getType.bind(_this,d.key) }  key={ i } className={ d.key==_this.state.params?"on":"" }  > { d.name } </li>);
+
+				});
+
+				return headers;
+
+			},
+			getType: function(key,event) {
+				this.setState({
+					params: key,
+					is_load: true,
+				})
+
+				
+				this.getNewsDataCore(key);
+			},
+			getNewsDataCore: function(key) {
+
+
+
+				
+				 $.getJSON("/data", { limit:100 , type: key },function(ret) {
+				      if (this.isMounted()) {
+				         	if(ret.result && ret.result.data && ret.result.data.length){
+				         		this.setState({
+				         			is_load: false ,
+				         			data: ret.result.data,
+				         		})
+				         	}else {
+				         		this.setState({
+				         			is_load: false ,
+				         			data: [],
+				         		})
+				         	}
+
+
+				      }
+				 }.bind(this));	
+
+
+
+			},
+
+			getNewsData: function() {
+
+
+				var lis = [];
+
+				if(this.state.is_load) {
+
+
+					return <li className="load-item" > 正在加载数据... </li>;
+
+				}
+				if(this.state.data.length==0){
+
+					return <li className="load-item" > 没有数据 </li>;
+				}
+
+
+				this.state.data.map(function(d , i) {
+
+					if(d.thumbnail_pic_s02 && d.thumbnail_pic_s03){
+
+						lis.push(
+							<li key= {i} className="news-item"  >
+								<a className="clear" href={ d.url } target="_blank">
+									<h3 className="title" >
+										{ d.title }
+									</h3>
+
+									<div className="img-box" >
+
+										<div className="img-warp">
+											<img src={ d.thumbnail_pic_s } />
+										</div>
+										<div className="img-warp">
+											<img src={ d.thumbnail_pic_s02 } />
+										</div>
+										<div className="img-warp">
+											<img src={ d.thumbnail_pic_s03 } />
+										</div>
+									</div>
+
+									<div className="tags" >
+										{ d.author_name } { d.date }
+									</div>
+								</a>
+							</li>
+						);
+
+					} else {
+
+						lis.push(
+							<li key={ i } className="news-item" >
+								<a className="clear" href={ d.url } target="_blank">
+									<div className="info-box fl">
+										<h3 className="title" >
+											{ d.title }
+										</h3>
+										<div className="tags" >
+											{ d.author_name } { d.date }
+										</div>
+									</div>
+									<div className="img-one-box fr" >
+										<img src={ d.thumbnail_pic_s } />
+									</div>
+								</a>
+							</li>
+						);
+
+					}
+
+
+				});
+
+				return lis ;
+
+			},
+	
+			render: function() {
+
+
+				return  <div>
+							<ul className="nav" >
+								{ this.getHeader() }
+							</ul>
+
+							<ul className="news" >
+								{ this.getNewsData() }
+							</ul>
+						</div>
+			}
+
+
+
+		});
+
+	
+
+
+	ReactDOM.render(
+		<Dd />,
+		document.getElementById("news")
+	);
 	
 </script>
 
