@@ -5,7 +5,7 @@ var express = require('express'),
     app = express();
 
 
-app.set('port', 8080);
+app.set('port', 8888);
 app.use(express.static('./'));
 
 http.createServer(app).listen(app.get('port'), function () {
